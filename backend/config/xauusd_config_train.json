@@ -1,0 +1,61 @@
+{
+    "env": {
+        "observation_list": [
+            "Open_norm",
+            "High_norm",
+            "Low_norm",
+            "Close_norm",
+            "RSI", 
+            "MACD", 
+            "MACD_Histogram", 
+            "MACD_Signal", 
+            "STOCHk_14_3_3", 
+            "STOCHd_14_3_3",  
+            "ADX", 
+            "CCI", 
+            "SMA", 
+            "BBL_20_2.0", 
+            "BBM_20_2.0", 
+            "BBU_20_2.0", 
+            "BBB_20_2.0", 
+            "BBP_20_2.0",
+            "Fib_23.6", 
+            "Fib_38.2", 
+            "Fib_50.0", 
+            "Fib_61.8", 
+            "Fib_100.0",
+            "ATR"
+        ],
+        "over_night_cash_penalty": 100,
+        "balance": 100000,
+        "asset_col": "symbol",
+        "time_col": "time",
+        "random_start": true,
+        "log_filename": "xauusd_trade_log_",
+        "title":"XAUUSD 1H",
+        "description":"No desciption"
+    },
+    "symbol": {
+        "XAUUSD": {
+            "point": 100,
+            "max_spread": 50,
+            "transaction_fee": 10,
+            "over_night_penalty": 10,
+            "stop_loss_max": 300,
+            "profit_taken_max": 2500,
+            "max_current_holding": 100,
+            "limit_order": true,
+            "limit_order_expiration": 5
+        }
+    },
+    "trading_hour":{
+        "Sydney":{"from":0,"to":0},
+        "Tokyo":{"from":0,"to":0},
+        "London":{"from":0,"to":0},
+        "New York":{"from":0,"to":0}
+    },
+    "ploting":{
+        "buy":{"color":"red","shape":""},
+        "sell":{"color":"green","shape":""}
+    }
+}

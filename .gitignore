@@ -42,6 +42,15 @@ next-env.d.ts
 /node
 /dist
 /backend/.venv
+/backend/data
 /backend/python
 /backend/readme.md
 /backend/model/1/log_20250316_175646.txt
+
+
+*.zip
+*.pth
+*.log
+*.h5
+*.pt
+*.ckpt
