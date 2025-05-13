@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+	--background: #f9fafb;
+	/* --background: #ffffff; */
+	--foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--background: #0a0a0a;
+		--foreground: #ededed;
+	}
+}
+
+body {
+	color: var(--foreground);
+	background: var(--background);
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* For Chrome, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+	width: 16px; /* Increase width to allow space for "padding" */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(63, 67, 80, 0.24);
+	border-radius: 10px;
+
+	/* Simulating padding */
+	border: 5px solid white; /* Creates space around the thumb */
+}
+
+/* Handle on hover */
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: #b8b8b8;
+}
+
+.rdrDefinedRandesWrapper {
+	width: fit-content !important;
+}
+
+.rdrDefinedRangesWrapper {
+	width: fit-content !important;
+}

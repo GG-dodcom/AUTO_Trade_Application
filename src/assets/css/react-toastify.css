@@ -1,0 +1,42 @@
+/* Centering the toast */
+.Toastify__toast-container {
+	width: auto !important;
+}
+
+/* Custom styles for toast notifications */
+.Toastify__toast {
+	width: auto !important;
+	border-radius: 100px !important;
+	font-size: 14px;
+	padding: 20px;
+}
+
+/* Red (error) toast */
+.Toastify__toast--error {
+	background-color: #dc2626 !important; /* Tailwind red-600 */
+	color: white !important;
+}
+
+/* Green (success) toast */
+.Toastify__toast--success {
+	background-color: #16a34a !important; /* Tailwind green-600 */
+	color: white !important;
+}
+
+/* Custom styling for toast icons */
+.Toastify__toast-icon {
+	margin-right: 8px !important;
+}
+
+/* Custom close button */
+.Toastify__close-button {
+	color: white !important;
+	opacity: 0.8 !important;
+	top: auto !important;
+	right: 25px !important;
+	padding-left: 20px !important;
+	position: static !important;
+}
+.Toastify__close-button:hover {
+	opacity: 1 !important;
+}
