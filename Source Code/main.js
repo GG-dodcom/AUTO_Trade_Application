@@ -2,16 +2,6 @@ console.log(`Electron is using Node.js version: ${process.versions.node}`);
 
 console.log("Loading electron...");
 const { app, BrowserWindow } = require("electron");
-const path = require("path");
-const { spawn, exec } = require("child_process");
-const next = require("next");
-const http = require("http");
-const waitOn = require("wait-on");
-const net = require("net");
-const fs = require("fs");
-
-// Load environment variables
-require("dotenv").config({ path: path.join(app.getAppPath(), ".env") }); // Now app is defined
 
 // Enforce single instance
 const gotTheLock = app.requestSingleInstanceLock();
@@ -21,6 +11,26 @@ if (!gotTheLock) {
 	app.quit();
 	process.exit(0); // Force immediate exit
 }
+
+// Load other modules only if lock is acquired
+console.log("Loading path...");
+const path = require("path");
+
+console.log("Loading dotenv...");
+require("dotenv").config({ path: path.join(app.getAppPath(), ".env") }); // Now app is defined
+
+console.log("Loading child_process...");
+const { spawn, exec } = require("child_process");
+
+console.log("Loading next...");
+const next = require("next");
+
+console.log("Loading http...");
+const http = require("http");
+
+console.log("Loading wait-on...");
+const waitOn = require("wait-on");
+const net = require("net");
 
 // Rest of your existing code
 let pythonProcess;
@@ -50,172 +60,6 @@ const nextApp = next({
 	dir: __dirname,
 });
 const handle = nextApp.getRequestHandler();
-
-// Function to execute a command and capture output
-const execCommand = (command, args, options) => {
-	return new Promise((resolve, reject) => {
-		const process = spawn(command, args, { ...options, shell: false });
-		let stdout = "";
-		let stderr = "";
-
-		process.stdout.on("data", (data) => (stdout += data.toString()));
-		process.stderr.on("data", (data) => (stderr += data.toString()));
-		process.on("close", (code) => {
-			if (code === 0) {
-				resolve({ stdout, stderr });
-			} else {
-				reject(new Error(`Command failed with code ${code}: ${stderr}`));
-			}
-		});
-		process.on("error", (err) => reject(err));
-	});
-};
-
-// Function to prepare Python environment and track if packages were installed
-async function preparePythonEnvironment(appPath, pythonPath, requirementsPath) {
-	console.log("Preparing Python environment...");
-	let packagesInstalled = false;
-
-	// Check if pip is installed
-	try {
-		await execCommand(pythonPath, ["-m", "pip", "--version"], { cwd: appPath });
-		console.log("pip is already installed");
-	} catch (err) {
-		console.log("pip not found, installing...");
-		const getPipPath = path.join(appPath, "backend", "get-pip.py");
-		if (!fs.existsSync(getPipPath)) {
-			console.error("get-pip.py not found at:", getPipPath);
-			throw new Error("Cannot install pip: get-pip.py missing");
-		}
-		try {
-			await execCommand(pythonPath, [getPipPath], { cwd: appPath });
-			console.log("pip installed successfully");
-			packagesInstalled = true; // pip was installed
-		} catch (pipErr) {
-			console.error("Failed to install pip:", pipErr.message);
-			throw pipErr;
-		}
-	}
-
-	// Check installed packages
-	let installedPackages = [];
-	try {
-		const { stdout } = await execCommand(
-			pythonPath,
-			["-m", "pip", "list", "--format=json"],
-			{ cwd: appPath }
-		);
-		installedPackages = JSON.parse(stdout).map((pkg) => ({
-			name: pkg.name.toLowerCase(),
-			version: pkg.version,
-		}));
-	} catch (err) {
-		console.error("Failed to list installed packages:", err.message);
-	}
-
-	// Read requirements.txt and check for missing packages
-	let packagesToInstall = [];
-	try {
-		const requirementsContent = fs.readFileSync(requirementsPath, "utf-8");
-		packagesToInstall = requirementsContent
-			.split("\n")
-			.map((line) => line.trim())
-			.filter((line) => line && !line.startsWith("#"))
-			.map((line) => {
-				const [name, version] = line.split("==");
-				return { name: name.toLowerCase(), version: version || null };
-			})
-			.filter((pkg) => {
-				const installed = installedPackages.find(
-					(ip) =>
-						ip.name === pkg.name && (!pkg.version || ip.version === pkg.version)
-				);
-				return !installed;
-			});
-	} catch (err) {
-		console.error("Failed to read requirements.txt:", err.message);
-		throw err;
-	}
-
-	// Install requirements if needed
-	if (packagesToInstall.length > 0) {
-		console.log(
-			`Installing missing Python dependencies: ${packagesToInstall
-				.map((p) => p.name)
-				.join(", ")}`
-		);
-
-		// Install requirements
-		try {
-			console.log("Installing Python dependencies from requirements.txt...");
-			await execCommand(
-				pythonPath,
-				[
-					"-m",
-					"pip",
-					"install",
-					"-r",
-					requirementsPath,
-					"--no-warn-script-location",
-					"--no-cache-dir",
-				],
-				{ cwd: appPath }
-			);
-			console.log("Python dependencies installed successfully");
-			packagesInstalled = true; // Packages were installed
-		} catch (reqErr) {
-			console.error("Failed to install requirements:", reqErr.message);
-			throw reqErr;
-		}
-	} else {
-		console.log("All Python dependencies are already installed");
-	}
-
-	return packagesInstalled;
-}
-
-// Function to restart the application
-function restartApp() {
-	console.log("Restarting application due to new package installation...");
-
-	// Terminate child processes
-	const terminatePromises = [];
-	if (pythonProcess) {
-		terminatePromises.push(
-			new Promise((resolve) => {
-				console.log("Forcefully killing Python process...");
-				terminateProcess(pythonProcess, () => {
-					waitForProcessTermination(pythonProcess).then(resolve);
-				});
-			})
-		);
-		pythonProcess = null;
-	}
-	if (serverProcess) {
-		terminatePromises.push(
-			new Promise((resolve) => {
-				console.log("Forcefully killing WebSocket server process...");
-				terminateProcess(serverProcess, () => {
-					waitForProcessTermination(serverProcess).then(resolve);
-				});
-			})
-		);
-		serverProcess = null;
-	}
-
-	// Wait for processes to terminate
-	Promise.all(terminatePromises).then(() => {
-		// Close the window
-		if (win) {
-			win.destroy();
-			win = null;
-		}
-
-		// Relaunch the app
-		app.relaunch();
-		app.quit();
-	});
-}
 
 // Function to forcefully terminate a process and its children on Windows
 const terminateProcess = (process, callback) => {
@@ -307,7 +151,10 @@ async function createWindow() {
 		console.log(`Working directory set to: ${process.cwd()}`); // Log the default working directory
 		// const appPath = dev ? __dirname : app.getAppPath();
 
-		// Create window with loading screen
+		console.log("Preparing Next.js app...");
+		await nextApp.prepare();
+		console.log("Next.js app prepared successfully");
+
 		win = new BrowserWindow({
 			width: 1060,
 			height: 800,
@@ -315,33 +162,13 @@ async function createWindow() {
 				preload: path.join(__dirname, "preload.js"),
 				nodeIntegration: false,
 				contextIsolation: true,
-				autofill: false, // Disable autofill to avoid DevTools errors
 			},
 		});
-		await win.loadFile(path.join(appPath, "public", "loading.html"));
-		console.log("Loading screen displayed");
 
-		// Prepare Python environment
+		// Determine paths based on packaged or dev environment
 		const pythonPath = dev
 			? path.join(appPath, "backend/.venv/Scripts/python.exe")
-			: path.join(appPath, "backend/python/python.exe");
-		const requirementsPath = path.join(appPath, "backend/requirements.txt");
-		const packagesInstalled = await preparePythonEnvironment(
-			appPath,
-			pythonPath,
-			requirementsPath
-		);
-
-		// If packages were installed, restart the app
-		if (packagesInstalled) {
-			restartApp();
-			return;
-		}
-
-		console.log("Preparing Next.js app...");
-		await nextApp.prepare();
-		console.log("Next.js app prepared successfully");
-
+			: path.join(appPath, "backend/python/python.exe"); // Packaged Python
 		const backendScript = path.join(appPath, "backend/app.py");
 		const serverScript = path.join(appPath, "server.js");
 
@@ -424,6 +251,7 @@ async function createWindow() {
 					resources: [
 						`http://localhost:${port}`, // Next.js
 						`tcp:localhost:4000`, // WebSocket server
+						// Add `http://localhost:5000` if Python backend exposes an API
 					],
 					timeout: 30000, // 30 seconds timeout
 				});

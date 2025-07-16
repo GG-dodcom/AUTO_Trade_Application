@@ -717,17 +717,17 @@ def execute_trade(accountId, symbol, action, lot_size=0.1, config_file="./neo_fi
     if action_type == 0:  # Intended Buy
         if trend_percentage >= 70:  # 30% or more bars are upward
             final_action_type = 0  # Confirm Buy
-            logging.info(f"Predicted action: Buy")
+            print(f"Trend check: {trend_percentage}% upward, executing Buy")
         else:
             final_action_type = 1  # Switch to Sell
-            logging.info(f"Predicted action: Sell")
+            print(f"Trend check: {trend_percentage}% upward, switching to Sell")
     elif action_type == 1:  # Intended Sell
         if trend_percentage <= 30:  # 70% or more bars are downward (100% - 70% = 30% upward)
             final_action_type = 1  # Confirm Sell
-            logging.info(f"Predicted action: Sell")
+            print(f"Trend check: {trend_percentage}% upward, executing Sell")
         else:
             final_action_type = 0  # Switch to Buy
-            logging.info(f"Predicted action: Buy")
+            print(f"Trend check: {trend_percentage}% upward, switching to Buy")
 
     # Get price and point value
     price = tick.ask if final_action_type == 0 else tick.bid  # Buy at ask, Sell at bid
@@ -1102,19 +1102,19 @@ class RealTimeTrader:
                 emit_status()  # Notify frontend
                 return
 
-            # # Warm up the model with the 500-bar window
-            # try:
-            #     window_obs = self.env.get_window_obs()
-            #     for i, obs in enumerate(window_obs):  # Process all rows sequentially
-            #         action, _states = self.model.predict(obs, deterministic=True)
-            #         self.env.current_step = i  # Set the current step explicitly
-            #         self.env.step(action)  # Simulate trades for step i
-            #     logging.info("Model warm-up completed")
-            # except Exception as e:
-            #     logging.error(f"Error during model warm-up: {str(e)}")
-            #     self.stop_event.set()
-            #     emit_status()  # Notify frontend
-            #     return
+            # Warm up the model with the 500-bar window
+            try:
+                window_obs = self.env.get_window_obs()
+                for i, obs in enumerate(window_obs):  # Process all rows sequentially
+                    action, _states = self.model.predict(obs, deterministic=True)
+                    self.env.current_step = i  # Set the current step explicitly
+                    self.env.step(action)  # Simulate trades for step i
+                logging.info("Model warm-up completed")
+            except Exception as e:
+                logging.error(f"Error during model warm-up: {str(e)}")
+                self.stop_event.set()
+                emit_status()  # Notify frontend
+                return
             
             # Real-time loop
             last_time = None
@@ -1196,8 +1196,8 @@ class RealTimeTrader:
                     }
                     action, _states = self.model.predict(obs, deterministic=True)
                 
-                    # logging.info(f"Predicted action: {action}, action[0]: {action[0]}")
-                    # print(f"Predicted action: {action}, action[0]: {action[0]}")
+                    logging.info(f"Predicted action: {action}, action[0]: {action[0]}")
+                    print(f"Predicted action: {action}, action[0]: {action[0]}")
                     # Execute trade
                     trade_result = execute_trade(self.account_id, self.symbol, action[0], config_file=self.config_file)
                     logging.info(f"Trade result: {trade_result}")

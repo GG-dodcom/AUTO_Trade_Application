@@ -1,0 +1,80 @@
+{
+  "env": {
+    "observation_list": [
+      "Open_norm",
+      "High_norm",
+      "Low_norm",
+      "Close_norm",
+      "RSI_norm",
+      "MACD_norm",
+      "MACD_Histogram_norm",
+      "MACD_Signal_norm",
+      "STOCHk_14_3_3_norm",
+      "STOCHd_14_3_3_norm",
+      "ADX_norm",
+      "CCI_norm",
+      "SMA_norm",
+      "BBL_20_2.0_norm",
+      "BBM_20_2.0_norm",
+      "BBU_20_2.0_norm",
+      "BBB_20_2.0_norm",
+      "BBP_20_2.0_norm",
+      "Fib_23.6_norm",
+      "Fib_38.2_norm",
+      "Fib_50.0_norm",
+      "Fib_61.8_norm",
+      "Fib_100.0_norm",
+      "ATR_norm"
+    ],
+    "over_night_cash_penalty": 100,
+    "balance": 600,
+    "asset_col": "symbol",
+    "time_col": "time",
+    "random_start": false,
+    "log_filename": "xauusd_trade_log_",
+    "title": "XAUUSD 1H",
+    "description": "No desciption"
+  },
+  "symbol": {
+    "XAUUSD": {
+      "point": 100,
+      "max_spread": 50,
+      "transaction_fee": 10,
+      "over_night_penalty": 10,
+      "stop_loss_max": 430,
+      "profit_taken_max": 400,
+      "max_current_holding": 100,
+      "limit_order": true,
+      "limit_order_expiration": 5,
+      "volume": 0.01
+    }
+  },
+  "trading_hour": {
+    "Sydney": {
+      "from": 0,
+      "to": 0
+    },
+    "Tokyo": {
+      "from": 0,
+      "to": 0
+    },
+    "London": {
+      "from": 0,
+      "to": 0
+    },
+    "New York": {
+      "from": 0,
+      "to": 0
+    }
+  },
+  "ploting": {
+    "buy": {
+      "color": "red",
+      "shape": ""
+    },
+    "sell": {
+      "color": "green",
+      "shape": ""
+    }
+  }
+}
